@@ -25,37 +25,47 @@ describe Oystercard do
 
   describe '@journey' do
     it 'starts not in a journey' do
-      expect(subject.journey).to eq(false)
+      expect(subject.in_journey?).to eq(false)
     end
   end
   describe '#touch_in' do
+
+    let(:station){double :station}
+    it 'touching in with station at param sets instance variable to param' do
+      subject.top_up(5)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq(station)
+    end
     it 'after touching in journey set to true' do
       subject.top_up(1)
-      subject.touch_in
-      expect(subject.journey).to eq(true)
+      subject.touch_in(station)
+      expect(subject.in_journey?).to eq(true)
     end
 
     it 'will fail is #touch_in is run with @balance less than 1' do
-      expect{ subject.touch_in }.to raise_error('Not enough money on card')
+      expect{ subject.touch_in(station) }.to raise_error('Not enough money on card')
     end
   end
    
   describe 'touch_out' do 
+
+    let(:station){double :station}
+
     it 'after touching out journey set to false' do
       subject.top_up(1)
-      subject.touch_in
+      subject.touch_in(station)
       subject.touch_out
-      expect(subject.journey).to eq(false)
+      expect(subject.in_journey?).to eq(false)
     end
     it 'touching out reduces balance by min fare' do 
       subject.top_up(5)
-      subject.touch_in
+      subject.touch_in(station)
       subject.touch_out
       expect(subject.balance).to eq(4)
     end
     it 'touching out reduces by min fare' do 
       subject.top_up(5)
-      subject.touch_in
+      subject.touch_in(station)
       expect{ subject.touch_out }.to change{ subject.balance }.by(-Oystercard::MINIMUM_CHARGE)
     end
   end
