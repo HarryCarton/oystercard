@@ -36,13 +36,19 @@ describe Oystercard do
   end
   describe '#touch_in' do
     it 'after touching in journey set to true' do
+      subject.top_up(1)
       subject.touch_in
       expect(subject.journey).to eq(true)
+    end
+
+    it 'will fail is #touch_in is run with @balance less than 1' do
+      expect{ subject.touch_in }.to raise_error('Not enough money on card')
     end
   end
    
   describe 'touch_out' do 
     it 'after touching out journey set to false' do
+      subject.top_up(1)
       subject.touch_in
       subject.touch_out
       expect(subject.journey).to eq(false)
