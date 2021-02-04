@@ -23,25 +23,17 @@ describe Oystercard do
   end
 
 
-  describe '#in_journey' do
-    it 'starts not in a journey' do
-      expect(subject.in_journey?).to eq(false)
-    end
-  end
+
   describe '#touch_in' do
 
     let(:entry_station){double :entry_station}
     let(:exit_station){double :exit_station}
 
-    it 'touching in with station at param sets instance variable to param' do
-      subject.top_up(5)
-      subject.touch_in(entry_station)
-      expect(subject.entry_station).to eq(entry_station)
-    end
+
     it 'after touching in journey set to true' do
       subject.top_up(1)
       subject.touch_in(entry_station)
-      expect(subject.in_journey?).to eq(true)
+      expect(subject.journey.in_journey?).to eq(true)
     end
 
     it 'will fail is #touch_in is run with @balance less than 1' do
@@ -58,7 +50,7 @@ describe Oystercard do
       subject.top_up(1)
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
-      expect(subject.in_journey?).to eq(false)
+      expect(subject.journey.in_journey?).to eq(false)
     end
     it 'touching out reduces balance by min fare' do 
       subject.top_up(5)
@@ -69,7 +61,7 @@ describe Oystercard do
     it 'touching out reduces by min fare' do 
       subject.top_up(5)
       subject.touch_in(entry_station)
-      expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Oystercard::MINIMUM_CHARGE)
+      expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Journey::MINIMUM_CHARGE)
     end
   end
   describe '@journeys' do
@@ -78,13 +70,13 @@ describe Oystercard do
     let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
 
     it 'has an empty list of journeys by default' do
-      expect(subject.journeys).to be_empty
+      expect(subject.journey.journeys).to be_empty
     end
     it 'stores a journey' do
       subject.top_up(5)
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
-      expect(subject.journeys).to include(journey)
+      expect(subject.journey.journeys).to include(journey)
     end
   end
 end
