@@ -23,50 +23,68 @@ describe Oystercard do
   end
 
 
-  describe '@journey' do
+  describe '#in_journey' do
     it 'starts not in a journey' do
       expect(subject.in_journey?).to eq(false)
     end
   end
   describe '#touch_in' do
 
-    let(:station){double :station}
+    let(:entry_station){double :entry_station}
+    let(:exit_station){double :exit_station}
+
     it 'touching in with station at param sets instance variable to param' do
       subject.top_up(5)
-      subject.touch_in(station)
-      expect(subject.entry_station).to eq(station)
+      subject.touch_in(entry_station)
+      expect(subject.entry_station).to eq(entry_station)
     end
     it 'after touching in journey set to true' do
       subject.top_up(1)
-      subject.touch_in(station)
+      subject.touch_in(entry_station)
       expect(subject.in_journey?).to eq(true)
     end
 
     it 'will fail is #touch_in is run with @balance less than 1' do
-      expect{ subject.touch_in(station) }.to raise_error('Not enough money on card')
+      expect{ subject.touch_in(entry_station) }.to raise_error('Not enough money on card')
     end
   end
    
   describe 'touch_out' do 
 
-    let(:station){double :station}
-
+    let(:entry_station){double :entry_station}
+    let(:exit_station){double :exit_station}
+    
     it 'after touching out journey set to false' do
       subject.top_up(1)
-      subject.touch_in(station)
-      subject.touch_out
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
       expect(subject.in_journey?).to eq(false)
     end
     it 'touching out reduces balance by min fare' do 
       subject.top_up(5)
-      subject.touch_in(station)
-      subject.touch_out
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
       expect(subject.balance).to eq(4)
     end
     it 'touching out reduces by min fare' do 
       subject.top_up(5)
-      subject.touch_in(station)
-      expect{ subject.touch_out }.to change{ subject.balance }.by(-Oystercard::MINIMUM_CHARGE)
+      subject.touch_in(entry_station)
+      expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Oystercard::MINIMUM_CHARGE)
+    end
+  end
+  describe '@journeys' do
+    let(:entry_station){double :entry_station}
+    let(:exit_station){double :exit_station}
+    let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
+
+    it 'has an empty list of journeys by default' do
+      expect(subject.journeys).to be_empty
+    end
+    it 'stores a journey' do
+      subject.top_up(5)
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to include(journey)
     end
   end
 end
